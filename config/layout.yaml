@@ -1,0 +1,60 @@
+# ============================================================================
+#  WAREHOUSE LAYOUT  —  the twin's EXPECTED state
+# ============================================================================
+#
+# Bays are laid out along both straights of the oval track. The rover runs
+# counter-clockwise, so the shelving is always on its RIGHT: mount the camera
+# on the right-hand side and it faces a bay on every pass.
+#
+#        y=11.7 ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐   zone B (top)
+#        y=10.5 └────┘ └────┘ └────┘ └────┘ └────┘ └────┘
+#        y=10.0  ←─────────── top straight ───────────←
+#                 ╭                                   ╮
+#        y= 6.5  dock                                 │   arcs r = 3.5 m
+#                 ╰                                   ╯
+#        y= 3.0  →────────── bottom straight ─────────→
+#        y= 2.5 ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐   zone A (bottom)
+#        y= 1.3 └────┘ └────┘ └────┘ └────┘ └────┘ └────┘
+#
+# To match your real mock-up: drive the rover to a bay corner, read the pose
+# off the dashboard header, and put those numbers in x / y below. Restart and
+# the layout re-syncs — no code change, no SQL.
+#
+# scan_x / scan_y is where the rover sits when it inspects that bay. Those
+# points must lie ON the track, which for this layout means y = 3.0 for zone A
+# and y = 10.0 for zone B.
+# ============================================================================
+
+name: VIT Chennai Warehouse Mock-up
+frame_id: map
+bounds: [0.0, 0.0, 24.0, 13.0]     # [minx, miny, maxx, maxy]
+dock: [1.5, 6.5]                   # left apex of the oval
+
+shelves:
+  # ---- zone A: below the bottom straight, rover faces -y (heading -90) ----
+  - { shelf_id: A1, zone: A, x: 5.0,  y: 1.3, w: 2.0, h: 1.2, scan_x: 6.0,  scan_y: 3.0,
+      products: { Hand Soap: 12 } }
+  - { shelf_id: A2, zone: A, x: 7.4,  y: 1.3, w: 2.0, h: 1.2, scan_x: 8.4,  scan_y: 3.0,
+      products: { Shampoo: 10 } }
+  - { shelf_id: A3, zone: A, x: 9.8,  y: 1.3, w: 2.0, h: 1.2, scan_x: 10.8, scan_y: 3.0,
+      products: { Toothpaste: 14 } }
+  - { shelf_id: A4, zone: A, x: 12.2, y: 1.3, w: 2.0, h: 1.2, scan_x: 13.2, scan_y: 3.0,
+      products: { Sanitizer: 10 } }
+  - { shelf_id: A5, zone: A, x: 14.6, y: 1.3, w: 2.0, h: 1.2, scan_x: 15.6, scan_y: 3.0,
+      products: { Face Wash: 12 } }
+  - { shelf_id: A6, zone: A, x: 17.0, y: 1.3, w: 2.0, h: 1.2, scan_x: 18.0, scan_y: 3.0,
+      products: { Shaving Gel: 8 } }
+
+  # ---- zone B: above the top straight, rover faces +y (heading 90) ----
+  - { shelf_id: B1, zone: B, x: 17.0, y: 10.5, w: 2.0, h: 1.2, scan_x: 18.0, scan_y: 10.0,
+      products: { Biscuits: 16 } }
+  - { shelf_id: B2, zone: B, x: 14.6, y: 10.5, w: 2.0, h: 1.2, scan_x: 15.6, scan_y: 10.0,
+      products: { Instant Noodles: 18 } }
+  - { shelf_id: B3, zone: B, x: 12.2, y: 10.5, w: 2.0, h: 1.2, scan_x: 13.2, scan_y: 10.0,
+      products: { Coffee Jar: 8 } }
+  - { shelf_id: B4, zone: B, x: 9.8,  y: 10.5, w: 2.0, h: 1.2, scan_x: 10.8, scan_y: 10.0,
+      products: { Tea Pack: 12 } }
+  - { shelf_id: B5, zone: B, x: 7.4,  y: 10.5, w: 2.0, h: 1.2, scan_x: 8.4,  scan_y: 10.0,
+      products: { Rice Bag: 10 } }
+  - { shelf_id: B6, zone: B, x: 5.0,  y: 10.5, w: 2.0, h: 1.2, scan_x: 6.0,  scan_y: 10.0,
+      products: { Cooking Oil: 12 } }

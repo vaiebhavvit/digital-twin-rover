@@ -1,0 +1,94 @@
+# ============================================================================
+#  THE ROVER'S PATROL ROUTE  —  this is the file you edit to change the path
+# ============================================================================
+#
+# The rover follows this path. The dashboard draws it, the simulator drives
+# it, and the real rover fetches it from GET /api/route. Change this file and
+# all three change together — no code edits anywhere.
+#
+# After editing:   python run.py                                   (restart)
+#          or:     curl -X POST http://localhost:8000/api/route/reload
+#
+# There are two ways to define the path. Use ONE.
+#
+#   A. shape:      the twin generates the waypoints for you (below)
+#   B. waypoints:  you list every waypoint by hand (example at the bottom)
+#
+# ============================================================================
+
+name: Oval perimeter patrol
+loop: true
+default_speed: 0.45           # m/s
+
+# ---------------------------------------------------------------------------
+#  OBSTACLE HANDLING  (ultrasonic sensor)
+# ---------------------------------------------------------------------------
+# obstacle_stop_distance : anything closer than this, in metres, stops the
+#                          rover and turns the strip ahead RED.
+# recheck_interval       : after stopping, wait this many seconds, then read
+#                          the sensor again. Clear -> strip turns GREEN and
+#                          the rover moves off. Still blocked -> stays RED and
+#                          it waits another interval.
+# clear_margin           : the reading must exceed stop_distance + this margin
+#                          to count as clear, so a sensor hovering right on
+#                          the threshold cannot flicker the rover stop/go.
+obstacle_stop_distance: 0.40
+recheck_interval: 3.0
+clear_margin: 0.10
+
+# ---------------------------------------------------------------------------
+#  PATH STRIPS
+# ---------------------------------------------------------------------------
+# The route is cut into strips. Every bay gets its own strip across its
+# frontage; the rest of the loop is filled with transit strips. Each strip is
+# what turns red or green on the dashboard.
+strips:
+  shelf_margin: 0.20          # extra length each side of a bay's frontage (m)
+  max_transit_length: 3.0     # longest a transit strip may be (m)
+  lookahead: 0.80             # how far ahead of the rover "the strip ahead" is
+  clear_hold: 4.0             # seconds a green strip stays green after passing
+  stale_after: 30.0           # drop a strip state the rover stopped reporting
+
+# ---------------------------------------------------------------------------
+#  A. GENERATED OVAL
+# ---------------------------------------------------------------------------
+# Two straights joined by two semicircular arcs. Change these six numbers and
+# the whole track moves — the dashboard, the simulator and the rover all pick
+# up the new path on the next reload.
+#
+#   center          : middle of the oval, metres
+#   straight_length : length of each straight section
+#   radius          : corner radius; the track is 2 x radius tall
+#   corner_samples  : points used to draw each arc. More = smoother, slower
+#   direction       : ccw keeps the shelving on the rover's right
+#   dock_at         : left | right | none — where the charging base sits
+#   inspect         : which zones to stop at; bays are matched to the nearest
+#                     point on the track by their scan_x / scan_y
+shape:
+  type: oval
+  center: [12.0, 6.5]
+  straight_length: 14.0
+  radius: 3.5
+  corner_samples: 12
+  direction: ccw
+  dock_at: left
+  dock_pause: 4.0
+  inspect: all
+
+# ---------------------------------------------------------------------------
+#  B. HAND-WRITTEN PATH  (delete the `shape:` block above to use this)
+# ---------------------------------------------------------------------------
+# Each waypoint takes:
+#   id       short label drawn on the map                       (required)
+#   x, y     position in metres, same frame as layout.yaml      (required)
+#   action   move | inspect | dock | wait                       (default move)
+#   shelf    which bay to inspect — required for action: inspect
+#   heading  degrees faced on arrival; 0 = +x, 90 = +y
+#   pause    seconds held here (default 0; inspect defaults to 2.5)
+#   speed    m/s for the leg INTO this waypoint
+#
+# waypoints:
+#   - { id: HOME, x: 1.5,  y: 6.5, action: dock, heading: -90, pause: 4 }
+#   - { id: W1,   x: 5.0,  y: 3.0 }
+#   - { id: A1,   x: 6.0,  y: 3.0, action: inspect, shelf: A1, heading: -90 }
+#   - { id: A2,   x: 8.4,  y: 3.0, action: inspect, shelf: A2, heading: -90 }

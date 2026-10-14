@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Warehouse Digital Twin</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Warehouse Digital Twin</h1>
+      <div class="sub" id="layoutname">Live replica of the warehouse and the inspection rover</div>
+    </div>
+    <div class="status-group">
+      <div class="pill">
+        <span class="dot" id="roverdot"></span>
+        <div><b id="roverstate">Waiting for rover</b><div class="lbl" id="roverpos"></div></div>
+        <div class="batt" title="Battery"><i id="battfill" style="width:0%"></i></div>
+      </div>
+      <div class="pill">
+        <span class="dot" id="routedot"></span>
+        <div><b id="routestate">Route idle</b><div class="lbl" id="routedetail">no progress yet</div></div>
+      </div>
+      <div class="pill">
+        <span class="dot" id="linkdot"></span>
+        <div><b id="linkstate">Connecting</b><div class="lbl" id="linkdetail">live stream</div></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v" id="k-compliance">—</div><div class="k">Shelf compliance</div></div>
+    <div class="kpi"><div class="v" id="k-inspec">—</div><div class="k">Bays in spec</div></div>
+    <div class="kpi bad"><div class="v" id="k-critical">—</div><div class="k">Critical alerts</div></div>
+    <div class="kpi warn"><div class="v" id="k-restock">—</div><div class="k">Items to restock</div></div>
+    <div class="kpi"><div class="v" id="k-progress">—</div><div class="k">Lap progress</div></div>
+    <div class="kpi"><div class="v" id="k-scans">—</div><div class="k">Total inspections</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="card mapcard">
+      <h2>Warehouse floor <em id="maptime">waiting for the rover</em></h2>
+      <div id="mapwrap">
+        <canvas id="map"></canvas>
+        <div class="maphint">Drag to pan · scroll to zoom · click a bay or waypoint</div>
+        <div class="maptools">
+          <div class="toolrow">
+            <button id="btn-fit" title="Fit the whole floor">Fit</button>
+            <button id="btn-follow" title="Keep the rover centred">Follow</button>
+          </div>
+          <div class="toolrow" id="layers">
+            <button data-layer="strips" class="on">Strips</button>
+            <button data-layer="labels" class="on">Strip IDs</button>
+            <button data-layer="waypoints">Waypoints</button>
+            <button data-layer="bays" class="on">Bays</button>
+            <button data-layer="path">Travelled</button>
+          </div>
+        </div>
+        <div class="scalebar"><div class="bar" id="scalebar"></div><span id="scalelabel"></span></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--ok)"></i>In spec</span>
+        <span><i style="background:var(--low)"></i>Low stock</span>
+        <span><i style="background:var(--out)"></i>Empty</span>
+        <span><i style="background:var(--misplaced)"></i>Misplaced item</span>
+        <span><i style="background:#2A3845;border:1px solid #3B4D5E"></i>Not scanned</span>
+        <span><i style="background:var(--rover);border-radius:50%"></i>Rover</span>
+        <span><i style="background:var(--route)"></i>Strip idle</span>
+        <span><i style="background:var(--strip-green)"></i>Strip clear — go</span>
+        <span><i style="background:var(--strip-red)"></i>Strip blocked — stop</span>
+        <span><i style="background:var(--out);border-radius:50%"></i>Obstacle</span>
+      </div>
+    </div>
+
+    <div class="rail">
+      <div class="card">
+        <h2>Path signal <em id="signalstrip">waiting for the rover</em></h2>
+        <div class="signal">
+          <div class="lamp" id="lamp">—</div>
+          <div class="txt">
+            <b id="signaltitle">No reading yet</b>
+            <span id="signalsub">The rover has not reported its ultrasonic sensor</span>
+          </div>
+          <div class="countdown" id="countdown" style="display:none">
+            <b id="cdvalue">—</b><span>recheck</span>
+          </div>
+        </div>
+        <div class="striplist" id="striplist"></div>
+      </div>
+      <div class="card grow">
+        <h2>Alerts <em id="alertcount"></em></h2>
+        <div class="scroll" id="alerts"><div class="empty">Waiting for the first inspection.</div></div>
+      </div>
+      <div class="card">
+        <h2 id="detailtitle">Bay detail <em>click a bay on the map</em></h2>
+        <div class="pad" id="detail">
+          <div class="muted">Select any bay to see expected versus detected stock, misplaced items and the time of its last scan.</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Patrol route <em id="routename">—</em></h2>
+        <div class="pad">
+          <div class="progress" title="Position along the lap">
+            <i id="progbar" style="width:0%"></i>
+          </div>
+          <div class="slamgrid" style="margin-top:12px">
+            <div><span>Next stop</span><b id="r-next">—</b></div>
+            <div><span>Arrives in</span><b id="r-eta">—</b></div>
+            <div><span>Route length</span><b id="r-len">—</b></div>
+            <div><span>Inspection stops</span><b id="r-stops">—</b></div>
+            <div><span>Current leg</span><b id="r-leg">—</b></div>
+            <div><span>Off route by</span><b id="r-off">—</b></div>
+          </div>
+          <div id="routewarn"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div class="card">
+      <h2>Inventory ledger <em>expected versus detected, per bay</em></h2>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Bay</th><th>Product</th><th>Detected</th><th>Expected</th>
+            <th style="width:120px">Level</th><th>Status</th></tr></thead>
+          <tbody id="ledger"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Restock forecast <em>trend of inspection history</em></h2>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Product</th><th>Trend</th><th>Per day</th><th>Runs out</th><th>Priority</th></tr></thead>
+          <tbody id="forecast"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">Fixed patrol route → shelf inspection → digital twin → compliance and predictive restocking</div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

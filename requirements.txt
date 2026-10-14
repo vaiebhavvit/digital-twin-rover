@@ -1,0 +1,13 @@
+# Digital Twin server
+fastapi>=0.110
+uvicorn[standard]>=0.27
+sqlalchemy>=2.0
+pydantic>=2.6
+pyyaml>=6.0
+requests>=2.31
+
+# Optional, by role:
+#   psycopg[binary]>=3.1    PostgreSQL instead of SQLite
+#   pymysql>=1.1            MySQL / MariaDB instead of SQLite
+#   ultralytics, opencv-python   on the Jetson, for tools/rover_client.py
+
